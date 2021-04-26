@@ -29,6 +29,7 @@ class FACache:
         if tag in tags.values:
             if self.cache.loc[tags[tags == tag].index[0], "V"] == 1:
                 self.hits.append(f'Hit: {addr}')
+                self.cycles += 1
             else:
                 self.hits.append(f'Miss: {addr}')
                 valid = self.cache["V"]
@@ -36,16 +37,18 @@ class FACache:
                 index = valid[valid == 0].index[0]
                 self.cache.loc[index, "V"] = 1
                 self.cache.loc[index, "tag"] = tag
+                self.cycles += self.miss_cycle_cost
                 self.update()
         else:
             self.hits.append(f'Miss: {addr}')
+            self.cycles += self.miss_cycle_cost
             valid = self.cache["V"]
             if 0 in valid.values:
                 index = valid[valid == 0].index[0]
                 self.cache.loc[index, "V"] = 1
                 self.cache.loc[index, "tag"] = tag
                 self.update()
-            #update this
+
             else:
                 LRU = self.cache["LRU"]
                 index = LRU[LRU == self.rows].index[0]
@@ -54,7 +57,7 @@ class FACache:
                 self.update()
 
     def showhits(self) -> None:
-        print("\n".join(self.hits))
+        print(", ".join(self.hits))
 
     def showcache(self) -> None:
         print(self.cache)
@@ -63,3 +66,7 @@ class FACache:
         tagsize = (16 - np.log2(self.blksize)) - np.log2(self.rows)
         datasize = self.blksize * 8
         return (tagsize + datasize + 1) * self.rows
+
+    def reset(self) -> None:
+        self.cycles = 0
+        self.hits = []

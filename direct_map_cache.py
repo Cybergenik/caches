@@ -22,7 +22,7 @@ class DMCache:
         index = int(block % self.rows)
         tag = int(addr / self.rows)
 
-        if self.cache["V"][index] != 0 or self.cache["tag"][index] == tag:
+        if self.cache["V"][index] != 0 and self.cache["tag"][index] == tag:
             self.hits.append(f'Hit: {addr}')
             self.cycles += 1
         else:
@@ -32,7 +32,7 @@ class DMCache:
             self.cycles += self.miss_cycle_cost
 
     def showhits(self) -> None:
-        print("\n".join(self.hits))
+        print(", ".join(self.hits))
 
     def showcache(self) -> None:
         print(pd.DataFrame(self.cache))
@@ -41,3 +41,7 @@ class DMCache:
         tagsize = (16 - np.log2(self.blksize)) - np.log2(self.rows)
         datasize = self.blksize * 8
         return (tagsize + datasize + 1) * self.rows
+
+    def reset(self) -> None:
+        self.cycles = 0
+        self.hits = []
